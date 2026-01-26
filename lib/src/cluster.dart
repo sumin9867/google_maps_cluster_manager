@@ -32,5 +32,8 @@ class Cluster<T extends ClusterItem> {
     );
   }
 
-  String getId() => items.map((i) => i.geohash).join('|');
+  String getId() {
+    final ids = items.map((i) => i.geohash).toList()..sort();
+    return ids.join('|');
+  }
 }

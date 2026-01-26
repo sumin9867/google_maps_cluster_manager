@@ -13,6 +13,8 @@ class ClusterManager<T extends ClusterItem> {
   List<T> _items = [];
   int? _mapId;
   CameraPosition? _lastCameraPosition;
+  bool _isUpdating = false;
+  bool _needsUpdate = false;
 
   ClusterManager(List<T> items, this._updateMarkers, {this.markerBuilder}) {
     _items = List<T>.from(items);
@@ -31,14 +33,23 @@ class ClusterManager<T extends ClusterItem> {
   }
 
   Future<void> updateMap() async {
-    if (_items.isEmpty) {
-      await _updateMarkers(<Marker>{});
+    if (_isUpdating) {
+      _needsUpdate = true;
       return;
     }
 
-    final double zoom = _lastCameraPosition?.zoom ?? 13.0;
+    _isUpdating = true;
+    _needsUpdate = false;
+
+    if (_items.isEmpty) {
+      await _updateMarkers(<Marker>{});
+      _isUpdating = false;
+      return;
+    }
+
+    final double zoom = _lastCameraPosition?.zoom ?? 1.0; // Changed from 13.0 to match initial zoom
     final double scale = (256 * math.pow(2, zoom)).toDouble();
-    const double clusterSize = 100.0; // Distance threshold in pixels
+    const double clusterSize = 80.0; // Adjusted for better production feel
 
     double lonToX(double lon) => (lon + 180) / 360 * scale;
     double latToY(double lat) {
@@ -116,5 +127,10 @@ class ClusterManager<T extends ClusterItem> {
 
     final markers = (await Future.wait(markerFutures)).toSet();
     await _updateMarkers(markers);
+
+    _isUpdating = false;
+    if (_needsUpdate) {
+      updateMap();
+    }
   }
 }
