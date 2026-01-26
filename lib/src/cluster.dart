@@ -16,5 +16,21 @@ class Cluster<T extends ClusterItem> {
 
   List<T> get clusterItems => items;
 
+  LatLngBounds get bounds {
+    double? minLat, maxLat, minLng, maxLng;
+    for (final item in items) {
+      final p = item.location;
+      if (minLat == null || p.latitude < minLat) minLat = p.latitude;
+      if (maxLat == null || p.latitude > maxLat) maxLat = p.latitude;
+      if (minLng == null || p.longitude < minLng) minLng = p.longitude;
+      if (maxLng == null || p.longitude > maxLng) maxLng = p.longitude;
+    }
+
+    return LatLngBounds(
+      southwest: LatLng(minLat!, minLng!),
+      northeast: LatLng(maxLat!, maxLng!),
+    );
+  }
+
   String getId() => items.map((i) => i.geohash).join('|');
 }

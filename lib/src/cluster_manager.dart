@@ -9,7 +9,7 @@ class ClusterManager<T extends ClusterItem> {
   static const int precision = 12;
 
   final FutureOr<void> Function(Set<Marker>) _updateMarkers;
-  Future<Marker> Function(dynamic)? markerBuilder;
+  Future<Marker> Function(Cluster<T>)? markerBuilder;
   List<T> _items = [];
   int? _mapId;
   CameraPosition? _lastCameraPosition;
